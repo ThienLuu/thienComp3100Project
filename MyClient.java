@@ -1,24 +1,32 @@
 import java.net.*;
 import java.io.*;
 
+//./ds-server ../../configs/sample-configs/ds-sample-config01.xml -n brief
+
 class MyClient {
     public static void main(String args[]) throws Exception {
-        Socket s = new Socket("localhost", 3333);
-        DataInputStream din = new DataInputStream(s.getInputStream());
+        Socket s = new Socket("localhost", 50000);
         DataOutputStream dout = new DataOutputStream(s.getOutputStream());
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedReader brin = new BufferedReader(new InputStreamReader(s.getInputStream()));
 
-        String str = "", str2 = "";
-        while (!str.equals("BYE")) {
-            str = br.readLine();
-            dout.writeUTF(str);
-            dout.flush();
-            str2 = din.readUTF();
-            System.out.println("Server says: " + str2);
-        }
-        str2 = din.readUTF();
-        System.out.println("Server says: " + str2);
+        sendToServer("HELO\n", dout);
+        System.out.println(brin.readLine());
+        sendToServer("AUTH focal\n", dout);
+        System.out.println(brin.readLine());
+        sendToServer("REDY\n", dout);
+
         dout.close();
         s.close();
+        
+    }
+
+    public static  void sendToServer(String msg, DataOutputStream dout){
+        try {
+            dout.write(msg.getBytes());
+            dout.flush();
+        } catch (Exception e) {
+            //TODO: handle exception
+            System.out.println(e);
+        }
     }
 }
