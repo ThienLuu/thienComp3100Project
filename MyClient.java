@@ -9,15 +9,21 @@ class MyClient {
         DataOutputStream dout = new DataOutputStream(s.getOutputStream());
         BufferedReader brin = new BufferedReader(new InputStreamReader(s.getInputStream()));
 
+        //Establish connection
         sendToServer("HELO\n", dout);
         System.out.println(brin.readLine());
         sendToServer("AUTH focal\n", dout);
         System.out.println(brin.readLine());
         sendToServer("REDY\n", dout);
+        System.out.println(brin.readLine());
 
+        
+
+        //Quit and close socket
+        sendToServer("QUIT\n", dout);
+        System.out.println(brin.readLine());
         dout.close();
         s.close();
-        
     }
 
     public static  void sendToServer(String msg, DataOutputStream dout){
