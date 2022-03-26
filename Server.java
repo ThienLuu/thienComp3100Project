@@ -1,16 +1,16 @@
 public class Server {
-    String type;
-    Integer limit;
-    Integer bootupTime;
-    Integer hourlyRate;
-    Integer cores;
-    Integer memory;
-    Integer disk;
+    String type;            //
+    Integer limit;          //
+    Integer bootupTime;     //
+    Float hourlyRate;       //
+    Integer cores;          //
+    Integer memory;         //
+    Integer disk;           // 
 
     public Server(String t,
                     Integer l, 
                     Integer b, 
-                    Integer h, 
+                    Float h, 
                     Integer c, 
                     Integer m, 
                     Integer d){
