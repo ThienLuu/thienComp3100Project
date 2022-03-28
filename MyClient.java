@@ -31,7 +31,9 @@ class MyClient {
         System.out.println("SERVER: " + receivedFromServer(brin));
 
         List<Server> listOfServers = new ArrayList<Server>();
+
         //READ XML, ADD SERVER TO LIST
+        //#region
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -70,72 +72,93 @@ class MyClient {
             //TODO: handle exception
             System.out.println(e);
         }
+        //#endregion
         
         // //-=- FIRST LOOP -=-
-        while(true){
+        Boolean firstLoop = true;
+        while(firstLoop){
 
             sendToServer("REDY\n", dout);
             //RESPONDS: JOBN
             String jobMsg = receivedFromServer(brin);
             System.out.println("SERVER: " + jobMsg);
-            if(!msg.equals("NONE")){
+            String[] jobMsgArr = jobMsg.trim().split("\\s+");
+            // System.out.println("Time submit: " + jobMsgArr[1]);
+            // System.out.println("JobID: " + jobMsgArr[2]);
+            // System.out.println("Estimated runtime: " + jobMsgArr[3]);
+            // System.out.println("Core: " + jobMsgArr[4]);
+            // System.out.println("Memory: " + jobMsgArr[5]);
+            // System.out.println("Disk: " + jobMsgArr[6] + "\n");
 
-                String[] jobMsgArr = jobMsg.trim().split("\\s+");
-                // System.out.println("Time submit: " + jobMsgArr[1]);
-                // System.out.println("JobID: " + jobMsgArr[2]);
-                // System.out.println("Estimated runtime: " + jobMsgArr[3]);
-                // System.out.println("Core: " + jobMsgArr[4]);
-                // System.out.println("Memory: " + jobMsgArr[5]);
-                // System.out.println("Disk: " + jobMsgArr[6] + "\n");
-                
-                sendToServer("GETS Capable " + jobMsgArr[4] + " " +         //Core
-                                                jobMsgArr[5] + " " +        //Memory
-                                                jobMsgArr[6] + "\n", dout); //Disk
-                
-                //Data Message
-                String dataMsg = receivedFromServer(brin);
-                System.out.println(dataMsg);
+            switch (jobMsgArr[0]) {
+                case "JOBN":
+                    sendToServer("GETS Capable " + jobMsgArr[4] + " " +         //Core
+                    jobMsgArr[5] + " " +        //Memory
+                    jobMsgArr[6] + "\n", dout); //Disk
 
-                //Extract number of data lines from 'Data message' and Print Servers
-                String[] dataMsgArr = dataMsg.trim().split("\\s+");
-                Integer noDataLines = Integer.parseInt(dataMsgArr[1]);
-                
-                //RESPOND TO DATA
-                sendToServer("OK\n", dout);
+                    //Data Message
+                    String dataMsg = receivedFromServer(brin);
+                    // System.out.println(dataMsg);
 
-                //READ DATA INTO OBJECT AND LIST
-                List<ServerState> listOfServerStates = new ArrayList<ServerState>();
-                for (int i = 0; i < noDataLines; i++) {
-                    String serverStatesMsg = receivedFromServer(brin);
+                    //Extract number of data lines from 'Data message' and Print Servers
+                    String[] dataMsgArr = dataMsg.trim().split("\\s+");
+                    Integer noDataLines = Integer.parseInt(dataMsgArr[1]);
 
-                    String[] serverStatesMsgArr = serverStatesMsg.trim().split("\\s+");
-                    ServerState serverState = new ServerState(
-                        serverStatesMsgArr[0],                    //Type
-                        Integer.parseInt(serverStatesMsgArr[1]),  //ID
-                        serverStatesMsgArr[2],  //State
-                        Integer.parseInt(serverStatesMsgArr[3]),  //curStartTime
-                        Integer.parseInt(serverStatesMsgArr[4]),  //Cores
-                        Integer.parseInt(serverStatesMsgArr[5]),  //Memory
-                        Integer.parseInt(serverStatesMsgArr[6]),  //Disk
-                        Integer.parseInt(serverStatesMsgArr[7]), 
-                        Integer.parseInt(serverStatesMsgArr[8])
+                    //RESPOND TO DATA
+                    sendToServer("OK\n", dout);
+
+                    //READ DATA INTO OBJECT AND LIST
+                    //#region
+                    List<ServerState> listOfServerStates = new ArrayList<ServerState>();
+                    for (int i = 0; i < noDataLines; i++) {
+                        String serverStatesMsg = receivedFromServer(brin);
+
+                        String[] serverStatesMsgArr = serverStatesMsg.trim().split("\\s+");
+                        ServerState serverState = new ServerState(
+                            serverStatesMsgArr[0],                    //Type
+                            Integer.parseInt(serverStatesMsgArr[1]),  //ID
+                            serverStatesMsgArr[2],  //State
+                            Integer.parseInt(serverStatesMsgArr[3]),  //curStartTime
+                            Integer.parseInt(serverStatesMsgArr[4]),  //Cores
+                            Integer.parseInt(serverStatesMsgArr[5]),  //Memory
+                            Integer.parseInt(serverStatesMsgArr[6]),  //Disk
+                            Integer.parseInt(serverStatesMsgArr[7]), 
+                            Integer.parseInt(serverStatesMsgArr[8])
                         );
 
                         listOfServerStates.add(serverState);
-                }
+                    }
+                    //#endregion
 
-                //RESPOND TO DATA COMPLETION
-                sendToServer("OK\n", dout);
-                System.out.println(receivedFromServer(brin));  
+                    //RESPOND TO DATA COMPLETION
+                    sendToServer("OK\n", dout);
+                    System.out.println(receivedFromServer(brin));
+                    
+                    
+                    
 
-                //SCHEDULE JOB TO SERVER
-                String serverType = assignServerType(listOfServers, Integer.parseInt(jobMsgArr[4]));
-                Integer serverId = assignServerId(listOfServerStates, Integer.parseInt(jobMsgArr[4]));
-                sendToServer("SCHD " + jobMsgArr[2] + " " + serverType + " " + serverId + "\n", dout);
-                System.out.println(receivedFromServer(brin));  
-            }
-            else{
-                break;
+
+
+                    //SCHEDULE JOB TO SERVER
+                    String serverType = assignServerType(listOfServers, Integer.parseInt(jobMsgArr[4]));
+                    Integer serverId = assignServerId(listOfServerStates, Integer.parseInt(jobMsgArr[4]));
+                    sendToServer("SCHD " + jobMsgArr[2] + " " + serverType + " " + serverId + "\n", dout);
+                    System.out.println(receivedFromServer(brin));  
+                    break;
+                case "JOBP":
+                    System.out.println("TESTING JOBP");
+                    break;
+                case "RESF":
+                    System.out.println("TESTING RESF");
+                    break;
+                case "RESR":
+                    System.out.println("TESTING RESR");
+                    break;
+                case "JCPL":
+                    break;
+                default:
+                    //BREAK FIRST LOOP
+                    firstLoop = false;
             }
         }
 
@@ -145,6 +168,8 @@ class MyClient {
         dout.close();
         s.close();
 
+        //COMMENTED OUT LOOP TEMPLATE
+        //#region
         //LOOP 1
         // while (true) {
         //     sendToServer("REDY\n", dout);
@@ -207,6 +232,7 @@ class MyClient {
         //     //TEST
         //     break;
         // }
+        //#endregion
     }
 
     public static  void sendToServer(String msg, DataOutputStream dout){
@@ -241,7 +267,9 @@ class MyClient {
     public static Integer assignServerId(List<ServerState> listOfServerStates, Integer core){
         List<ServerState> sameCoreServerStates = new ArrayList<ServerState>();
         for (ServerState serverState : listOfServerStates) {
+            System.out.println(serverState.type);
             if(serverState.cores >= core){
+                System.out.println("TEST");
                 sameCoreServerStates.add(serverState);
             }
         }
@@ -252,7 +280,6 @@ class MyClient {
                 tempServerState = serverState;
             }
         }
-        System.out.println(tempServerState.serverId);
         return tempServerState.serverId;
     }
 
