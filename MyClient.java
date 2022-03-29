@@ -173,7 +173,7 @@ class MyClient {
                         sendToServer("SCHD " + loopOneMsgArr[2] + " " + serverType + " " + serverId + "\n", dout);
                         String loopTwoMsg = receivedFromServer(brin);
                         String[] loopTwoMsgArr = loopTwoMsg.trim().split("\\s+");
-                        System.out.println("SERVER+: " + loopTwoMsg);
+                        System.out.println("SERVER: " + loopTwoMsg);
                         switch (loopTwoMsgArr[0]) {
                             case "ERR:":
                                 sendToServer("KILLJ " + serverType + " " + serverId + " " + loopOneMsgArr[2] + "\n", dout);
