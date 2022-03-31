@@ -2,19 +2,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-
 import java.io.*;
-
-//./ds-server ../../configs/sample-configs/ds-sample-config01.xml -n brief
 
 class MyClient {
     public static void main(String args[]) throws Exception {
@@ -26,20 +14,19 @@ class MyClient {
         //Establish connection
         sendToServer("HELO\n", dout);
         //RESPONDS: OK
-        System.out.println("SERVER: " + receivedFromServer(brin));
+        receivedFromServer(brin);
         sendToServer("AUTH focal\n", dout);
         //RESPONDS: OK
-        System.out.println("SERVER: " + receivedFromServer(brin));
+        receivedFromServer(brin);
         sendToServer("REDY\n", dout);
-        //RESPONDS JOBN (not used)
-        String firstJob = receivedFromServer(brin);
-        System.out.println("SERVER: " + firstJob);
+        //RESPONDS JOBN
+        receivedFromServer(brin);
 
+        //GET EACH SERVER CONFIGURATIONS
         sendToServer("GETS All\n", dout);
-        //RESPONDS DATAMSG
+        //RESPONDS DATA MSG
         List<ServerState> listOfServerStates = new ArrayList<ServerState>();
         String dataMsg= receivedFromServer(brin);
-        System.out.println("SERVER: " + dataMsg);
         sendToServer("OK\n", dout);
         //RESPONDS DATA: Server States
         //#region
@@ -63,15 +50,14 @@ class MyClient {
             );
 
             listOfServerStates.add(serverState);
-            //RESPOND .
-            System.out.println("SERVER: " + serverStatesMsg);
+            //RESPONDS .
+            System.out.println(serverStatesMsg);
         }
         //#endregion
         
         sendToServer("OK\n", dout);
         //RESPOND '.'
-        System.out.println("SERVER: " + receivedFromServer(brin));
-
+        receivedFromServer(brin);
 
         //GET LIST OF LARGEST CORES
         Collections.sort(listOfServerStates);
@@ -84,7 +70,6 @@ class MyClient {
         }
 
         //GET FIRST LARGEST CORE SERVER TYPE ADDED TO LIST
-
         Collections.reverse(listOfMaxCores);
         String firstMaxCoreType = listOfMaxCores.get(0).type;
         List<ServerState> listFirstMaxType = new ArrayList<ServerState>();
@@ -106,10 +91,12 @@ class MyClient {
             switch (serverMsgArr[0]) {
                 case "JOBN":
                     //SCHEDULE JOB TO SERVER 
-                    sendToServer("SCHD " + serverMsgArr[2] + " " + firstMaxCoreType + " " +
-                    listFirstMaxType.get(serverId).serverId + "\n", dout);
+                    sendToServer("SCHD " + serverMsgArr[2] + " "
+                                        + firstMaxCoreType + " "
+                                        + listFirstMaxType.get(serverId).serverId
+                                        + "\n", dout);
                     //RESPONSE 'OK'
-                    System.out.println("SERVER: " + receivedFromServer(brin));
+                    receivedFromServer(brin);
                     serverId++;
                     if(serverId == listFirstMaxType.size()){
                         serverId = 0;
@@ -131,6 +118,7 @@ class MyClient {
 
     public static void sendToServer(String msg, DataOutputStream dout){
         try {
+            System.out.println("*CLIENT: " + msg);
             dout.write(msg.getBytes());
             dout.flush();
         } catch (Exception e) {
@@ -141,7 +129,9 @@ class MyClient {
 
     public static String receivedFromServer(BufferedReader brin){
         try {
-            return brin.readLine();
+            String msg = brin.readLine();
+            System.out.println("*SERVER: " + msg);
+            return msg;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);

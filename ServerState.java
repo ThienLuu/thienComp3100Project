@@ -1,11 +1,11 @@
 public class ServerState implements Comparable<ServerState>{
-    String type;            //
+    String type;
     Integer serverId;
     String serverState;
     Integer curStartTime;
-    Integer cores;          //
-    Integer memory;         //
-    Integer disk;           //
+    Integer cores;
+    Integer memory;
+    Integer disk;
     Integer wJobs;
     Integer rJobs;
 
@@ -41,6 +41,4 @@ public class ServerState implements Comparable<ServerState>{
             return -1;
         }
     }
-
-    //Method
 }
