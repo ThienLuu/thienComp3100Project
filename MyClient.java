@@ -35,50 +35,6 @@ class MyClient {
         String firstJob = receivedFromServer(brin);
         System.out.println("SERVER: " + firstJob);
 
-        //READ XML, ADD SERVER TO LIST
-        //#region
-        List<Server> listOfServers = new ArrayList<Server>();
-
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new File("ds-sim/src/pre-compiled/ds-system.xml"));
-            
-            doc.getDocumentElement().normalize();
-
-            NodeList list = doc.getElementsByTagName("server");
-            
-            //List of servers
-            for (int i = 0; i < list.getLength(); i++) {
-                Node node = list.item(i);
-
-                if(node.getNodeType() == Node.ELEMENT_NODE){
-                    Element element = (Element) node;
-
-                    String type = element.getAttribute("type");
-                    Integer limit = Integer.parseInt(element.getAttribute("limit"));
-                    Integer bootupTime = Integer.parseInt(element.getAttribute("bootupTime"));
-                    Float hourlyRate = Float.parseFloat(element.getAttribute("hourlyRate"));
-                    Integer cores = Integer.parseInt(element.getAttribute("cores"));
-                    Integer memory = Integer.parseInt(element.getAttribute("memory"));
-                    Integer disk = Integer.parseInt(element.getAttribute("disk"));
-
-                    Server server = new Server(type,
-                                                limit,
-                                                bootupTime,
-                                                hourlyRate,
-                                                cores,
-                                                memory,
-                                                disk);
-                    listOfServers.add(server);
-                }
-            }
-        } catch (Exception e) {
-            //TODO: handle exception
-            System.out.println(e);
-        }
-        //#endregion
-
         sendToServer("GETS All\n", dout);
         //RESPONDS DATAMSG
         List<ServerState> listOfServerStates = new ArrayList<ServerState>();
