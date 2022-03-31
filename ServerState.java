@@ -1,4 +1,4 @@
-public class ServerState {
+public class ServerState implements Comparable<ServerState>{
     String type;            //
     Integer serverId;
     String serverState;
@@ -27,6 +27,19 @@ public class ServerState {
         this.disk = disk;
         this.wJobs = wJobs;
         this.rJobs = rJobs;
+    }
+
+    @Override
+    public int compareTo(ServerState ss) {
+        if(this.cores == ss.cores){
+            return 0;
+        }
+        else if(this.cores < ss.cores){
+            return 1;
+        }
+        else{
+            return -1;
+        }
     }
 
     //Method
