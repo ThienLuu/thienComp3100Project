@@ -31,6 +31,7 @@ class MyClient {
         //RESPONDS DATA: Server States
         //#region
         //Extract number of data lines from 'Data message' and Print Servers
+        //Create an object for each server read and add to listOfServerStates
         String[] dataMsgArr = dataMsg.trim().split("\\s+");
         Integer noDataLines = Integer.parseInt(dataMsgArr[1]);
         for (int i = 0; i < noDataLines; i++) {
@@ -50,8 +51,6 @@ class MyClient {
             );
 
             listOfServerStates.add(serverState);
-            //RESPONDS .
-            System.out.println(serverStatesMsg);
         }
         //#endregion
         
@@ -69,17 +68,7 @@ class MyClient {
             }
         }
 
-        // for (ServerState serverState : listOfMaxCores) {
-        //     System.out.println("BEFORE type " + serverState.type);
-        // }
-
-        // //GET FIRST LARGEST CORE SERVER TYPE ADDED TO LIST
-        // Collections.reverse(listOfMaxCores);
-
-        // for (ServerState serverState : listOfMaxCores) {
-        //     System.out.println("AFTER type " + serverState.type);
-        // }
-
+        //GET THE FIRST SERVER TYPE WITH LARGEST CORE ADDED TO LIST
         String firstMaxCoreType = listOfMaxCores.get(0).type;
         List<ServerState> listFirstMaxType = new ArrayList<ServerState>();
 
@@ -106,11 +95,16 @@ class MyClient {
                                         + "\n", dout);
                     //RESPONSE 'OK'
                     receivedFromServer(brin);
+                    //Increment serverId to achieve LRR algorithm
                     serverId++;
+                    //Reset the serverId to achieve LRR algorithm
+                    //once it equals the number of servers of type
                     if(serverId == listFirstMaxType.size()){
                         serverId = 0;
                     }
                     break;
+                //Break the loop when no jobs are available - NONE message
+                //received
                 case "NONE":
                     firstLoop = false;
                     break;
@@ -125,6 +119,7 @@ class MyClient {
         s.close();
     }
 
+    //METHOD: Send message to server
     public static void sendToServer(String msg, DataOutputStream dout){
         try {
             System.out.println("*CLIENT: " + msg);
@@ -136,15 +131,17 @@ class MyClient {
         }
     }
 
+    //METHOD: Acquire message from server
     public static String receivedFromServer(BufferedReader brin){
         try {
+            //Read buffer
             String msg = brin.readLine();
             System.out.println("*SERVER: " + msg);
             return msg;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
-            return "SERVER MESSAGE ERROR";
+            return "";
         }
     }
 }
