@@ -69,8 +69,17 @@ class MyClient {
             }
         }
 
-        //GET FIRST LARGEST CORE SERVER TYPE ADDED TO LIST
-        Collections.reverse(listOfMaxCores);
+        // for (ServerState serverState : listOfMaxCores) {
+        //     System.out.println("BEFORE type " + serverState.type);
+        // }
+
+        // //GET FIRST LARGEST CORE SERVER TYPE ADDED TO LIST
+        // Collections.reverse(listOfMaxCores);
+
+        // for (ServerState serverState : listOfMaxCores) {
+        //     System.out.println("AFTER type " + serverState.type);
+        // }
+
         String firstMaxCoreType = listOfMaxCores.get(0).type;
         List<ServerState> listFirstMaxType = new ArrayList<ServerState>();
 
@@ -93,7 +102,7 @@ class MyClient {
                     //SCHEDULE JOB TO SERVER 
                     sendToServer("SCHD " + serverMsgArr[2] + " "
                                         + firstMaxCoreType + " "
-                                        + listFirstMaxType.get(serverId).serverId
+                                        + serverId
                                         + "\n", dout);
                     //RESPONSE 'OK'
                     receivedFromServer(brin);
