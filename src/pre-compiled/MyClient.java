@@ -49,7 +49,6 @@ class MyClient {
                 Integer.parseInt(serverStatesMsgArr[7]), 
                 Integer.parseInt(serverStatesMsgArr[8])
             );
-
             listOfServerStates.add(serverState);
         }
         //#endregion
@@ -63,7 +62,7 @@ class MyClient {
         Integer maxCore = listOfServerStates.get(0).cores;
         List<ServerState> listOfMaxCores = new ArrayList<ServerState>();
         for (ServerState serverState : listOfServerStates) {
-            if(serverState.cores == maxCore){
+            if(serverState.cores.toString().equals(maxCore.toString())){
                 listOfMaxCores.add(serverState);
             }
         }
@@ -114,7 +113,6 @@ class MyClient {
 
         //Quit and close socket (End connection)
         sendToServer("QUIT\n", dout);
-        System.out.println(brin.readLine());
         dout.close();
         s.close();
     }
@@ -122,7 +120,6 @@ class MyClient {
     //METHOD: Send message to server
     public static void sendToServer(String msg, DataOutputStream dout){
         try {
-            System.out.println("*CLIENT: " + msg);
             dout.write(msg.getBytes());
             dout.flush();
         } catch (Exception e) {
@@ -136,7 +133,6 @@ class MyClient {
         try {
             //Read buffer
             String msg = brin.readLine();
-            System.out.println("*SERVER: " + msg);
             return msg;
         } catch (Exception e) {
             //TODO: handle exception
