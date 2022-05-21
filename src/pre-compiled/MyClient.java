@@ -75,8 +75,8 @@ class MyClient {
                 case "JOBN":
                     //SCHEDULE JOB TO SERVER 
                     sendToServer("SCHD " + serverMsgArr[2] + " "
-                                        + "super-silk" + " "
-                                        + 0
+                                        + listOfServerStates.get(listOfServerStates.size()-1).type + " "
+                                        + listOfServerStates.get(listOfServerStates.size()-1).serverId
                                         + "\n", dout);
                     //RESPONSE 'OK'
                     receivedFromServer(brin);
@@ -89,7 +89,7 @@ class MyClient {
                 default:
             }
             //REMOVE
-            schedLoop = false;
+            // schedLoop = false;
         }
         
         for (ServerState serverState : listOfServerStates) {
