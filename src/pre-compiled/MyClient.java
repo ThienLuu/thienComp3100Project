@@ -23,66 +23,81 @@ class MyClient {
         Boolean firstLoop = true;
         Boolean schedLoop = true;
         //RESPONDS DATA MSG
-        List<ServerState> listOfServerStates = new ArrayList<ServerState>();
+        List<Server> listOfServers = new ArrayList<Server>();
+        List<Server> listOfCapable = new ArrayList<Server>();
+        //List<Integer> listOfIntegers = new ArrayList<Integer>();
         while (schedLoop) {
-            //firstCycle
-            //#region
-            if(firstLoop){
-                sendToServer("REDY\n", dout);
-                //RESPONDS JOBN
-                receivedFromServer(brin);
-
-                //GET EACH SERVER CONFIGURATIONS
-                sendToServer("GETS All\n", dout);
-                String dataMsg= receivedFromServer(brin);
-                sendToServer("OK\n", dout);
-                //RESPONDS DATA: Server States
-                //#region
-                //Extract number of data lines from 'Data message' and Print Servers
-                //Create an object for each server read and add to listOfServerStates
-                String[] dataMsgArr = dataMsg.trim().split("\\s+");
-                Integer noDataLines = Integer.parseInt(dataMsgArr[1]);
-                for (int i = 0; i < noDataLines; i++) {
-                    String serverStatesMsg = receivedFromServer(brin);
-
-                    String[] serverStatesMsgArr = serverStatesMsg.trim().split("\\s+");
-                    ServerState serverState = new ServerState(
-                        serverStatesMsgArr[0],                    //Type
-                        Integer.parseInt(serverStatesMsgArr[1]),  //ID
-                        serverStatesMsgArr[2],  //State
-                        Integer.parseInt(serverStatesMsgArr[3]),  //curStartTime
-                        Integer.parseInt(serverStatesMsgArr[4]),  //Cores
-                        Integer.parseInt(serverStatesMsgArr[5]),  //Memory
-                        Integer.parseInt(serverStatesMsgArr[6]),  //Disk
-                        Integer.parseInt(serverStatesMsgArr[7]), 
-                        Integer.parseInt(serverStatesMsgArr[8])
-                    );
-                    listOfServerStates.add(serverState);
-                }
-                //#endregion
-
-                sendToServer("OK\n", dout);
-                receivedFromServer(brin);
-
-                firstLoop = false;
-            }
-            //#endregion
             sendToServer("REDY\n", dout);
             //RESPONDS JOBN
             String serverMsg = receivedFromServer(brin);
-            String[] serverMsgArr = serverMsg.trim().split("\\s+");
-            switch (serverMsgArr[0]) {
+            String[] dsServerMsgArr = serverMsg.trim().split("\\s+");
+            switch (dsServerMsgArr[0]) {
                 case "JOBN":
-                    //SCHEDULE JOB TO SERVER 
-                    sendToServer("SCHD " + serverMsgArr[2] + " "
-                                        + listOfServerStates.get(listOfServerStates.size()-1).type + " "
-                                        + listOfServerStates.get(listOfServerStates.size()-1).serverId
+                    sendToServer("GETS Capable " +  dsServerMsgArr[4] +
+                                        " " + dsServerMsgArr[5] +
+                                        " " + dsServerMsgArr[6] +
+                                        "\n", dout);
+                    String dataMsg= receivedFromServer(brin);
+                    sendToServer("OK\n", dout);
+                    //RESPONDS DATA: Server States
+                    //#region
+                    //Extract number of data lines from 'Data message' and Print Servers
+                    //Create an object for each server read and add to listOfServerStates
+                    String[] dataMsgArr = dataMsg.trim().split("\\s+");
+                    Integer noDataLines = Integer.parseInt(dataMsgArr[1]);
+                    for (int i = 0; i < noDataLines; i++) {
+                        String serverStatesMsg = receivedFromServer(brin);
+
+                        String[] serverMsgArr = serverStatesMsg.trim().split("\\s+");
+                        Server serverState = new Server(
+                            serverMsgArr[0],                    //Type
+                            Integer.parseInt(serverMsgArr[1]),  //ID
+                            serverMsgArr[2],  //State
+                            Integer.parseInt(serverMsgArr[3]),  //curStartTime
+                            Integer.parseInt(serverMsgArr[4]),  //Cores
+                            Integer.parseInt(serverMsgArr[5]),  //Memory
+                            Integer.parseInt(serverMsgArr[6]),  //Disk
+                            Integer.parseInt(serverMsgArr[7]), 
+                            Integer.parseInt(serverMsgArr[8])
+                        );
+                        listOfCapable.add(serverState);
+                    }
+
+                    sendToServer("OK\n", dout);
+                    receivedFromServer(brin);
+
+                    sendToServer("REDY\n", dout);
+                    //RESPONDS JOBN
+                    receivedFromServer(brin);
+                    
+                    Boolean capableServerInactiveCheck = true;
+                    for (Server server : listOfCapable) {
+                        if(!server.serverState.equals("inactive")){
+                            capableServerInactiveCheck = false;
+                        }
+                        if(server.serverState.equals("booting") ||
+                                    server.serverState.equals("idle")){
+                            sendToServer("SCHD " + dsServerMsgArr[2] + " "
+                                            + server.type + " "
+                                            + server.serverId
+                                            + "\n", dout);
+                            break;
+                        }
+                    }
+
+                    //Schedule job on biggest capable server if all server is inactive
+                    if(capableServerInactiveCheck){
+                        sendToServer("SCHD " + dsServerMsgArr[2] + " "
+                                        + listOfCapable.get(listOfCapable.size() - 1).type + " "
+                                        + listOfCapable.get(listOfCapable.size() - 1).serverId
                                         + "\n", dout);
+                    }
+                    
                     //RESPONSE 'OK'
                     receivedFromServer(brin);
                     break;
-                //Break the loop when no jobs are available - NONE message
-                //received
+                    //Break the loop when no jobs are available - NONE message
+                    //received
                 case "NONE":
                     schedLoop = false;
                     break;
@@ -92,7 +107,7 @@ class MyClient {
             // schedLoop = false;
         }
         
-        for (ServerState serverState : listOfServerStates) {
+        for (Server serverState : listOfServers) {
             System.out.println(serverState.type);
         }
 
