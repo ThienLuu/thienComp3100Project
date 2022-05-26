@@ -118,3 +118,27 @@
                     
                     // //RESPONSE 'OK'
                     // receivedFromServer(brin);
+
+
+                    //replicated FC
+                    // Job job = new Job(
+                    //     Integer.parseInt(dsServerMsgArr[1]),
+                    //     Integer.parseInt(dsServerMsgArr[2]),
+                    //     Integer.parseInt(dsServerMsgArr[3]),
+                    //     Integer.parseInt(dsServerMsgArr[4]),
+                    //     Integer.parseInt(dsServerMsgArr[5]),
+                    //     Integer.parseInt(dsServerMsgArr[6]));
+
+                    // for (Server server : listOfServers) {
+                    //     if(job.core <= server.cores &&
+                    //         job.memory <= server.memory &&
+                    //         job.disk <= server.disk){
+                    //         sendToServer("SCHD " + dsServerMsgArr[2] + " "
+                    //                         + server.type + " "
+                    //                         + server.serverId
+                    //                         + "\n", dout);
+                    //         break;
+                    //     }
+                    // }
+                    // //RESPONSE 'OK'
+                    // receivedFromServer(brin);

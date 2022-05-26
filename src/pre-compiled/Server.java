@@ -29,6 +29,10 @@ public class Server implements Comparable<Server>{
         this.rJobs = rJobs;
     }
 
+    Integer getWJobs(){
+        return wJobs;
+    }
+
     @Override
     public int compareTo(Server ss) {
         if(this.cores == ss.cores){
