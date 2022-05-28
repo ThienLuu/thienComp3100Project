@@ -33,6 +33,10 @@ public class Server implements Comparable<Server>{
         return wJobs;
     }
 
+    Integer getCores(){
+        return cores;
+    }
+
     @Override
     public int compareTo(Server ss) {
         if(this.cores == ss.cores){

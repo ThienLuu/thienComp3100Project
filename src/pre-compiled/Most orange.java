@@ -113,8 +113,20 @@ class MyClient {
                     }
                     Server selectedServer;
 
-                    if(!(listOfAvailable.isEmpty())){
-                        selectedServer = listOfAvailable.get(listOfAvailable.size() - 1);
+                    if(!listOfReady.isEmpty()){
+                        sendToServer("REDY\n", dout);
+                        //RESPONDS JOBN
+                        receivedFromServer(brin);
+                        List<Server> worstFitServer = new ArrayList<Server>();
+                        for (Server server : listOfReady) {
+                            if(server.cores >= job.core && server.memory >= job.memory && server.disk >= job.disk){
+                                worstFitServer.add(server);
+                            }
+                        }
+                        Collections.sort(worstFitServer, Comparator.comparingInt(Server::getCores));
+
+                        selectedServer = listOfReady.get(0);
+
                         sendToServer("SCHD " + job.jobId + " "
                                 + selectedServer.type + " "
                                 + selectedServer.serverId
