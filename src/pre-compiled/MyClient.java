@@ -2,7 +2,6 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.io.*;
 
@@ -79,47 +78,6 @@ class MyClient {
                     //RESPONSE 'OK'
                     receivedFromServer(brin);
                     break;
-                //When a job completes migrate any waiting jobs to the server the job compelted on
-                // case "JCPL":
-                //     //Get all servers
-                //     List<Server> listOfServers = new ArrayList<Server>();
-                //     listOfServers = getsAllServers(dout, brin);
-
-                //     sendToServer("REDY\n", dout);
-                //     //RESPONDS JOBN
-                //     receivedFromServer(brin);
-                    
-                //     //Sort all servers, with jobs in descending
-                //     //Get the first server sorted with the most jobs
-                //     Server serverWithMostJobs = listOfServers.get(listOfServers.size() - 1);
-                    
-                //     List<Server> listOfAvailableServers = new ArrayList<Server>();
-                //     List<Job> waitingJobsList = new ArrayList<Job>();
-                //     //Get list of waiting jobs for the server with the most jobs
-                //     waitingJobsList = getsListOfWaitingJobs(serverWithMostJobs.type, serverWithMostJobs.serverId, dout, brin);
-                //     if(!(waitingJobsList.isEmpty())){
-                //         for (Job waitingJob : waitingJobsList) {
-                //             //Get list of available servers for that job
-                //             listOfAvailableServers = getsAvailableServers(waitingJob.core, waitingJob.memory, waitingJob.disk, dout, brin);
-                //             if(!(listOfAvailableServers.isEmpty())){
-                //                 //Use the first available server with sufficient resources and migrate the job to it
-                //                 selectedServer = listOfAvailableServers.get(0);
-                //                 sendToServer("MIGJ " + waitingJob.jobId +
-                //                                 " " + serverWithMostJobs.type +
-                //                                 " " + serverWithMostJobs.serverId +
-                //                                 " " + selectedServer.type +
-                //                                 " " + selectedServer.serverId +
-                //                                 "\n", dout);
-                //                 receivedFromServer(brin);
-                //                 break;
-                //             }
-                //             else{
-                //                 sendToServer("OK\n", dout);
-                //                 receivedFromServer(brin);
-                //             }
-                //         }
-                //     }
-                //     break;
                 //Break the loop when no jobs are available - NONE message
                 case "NONE":
                     schedLoop = false;
@@ -156,96 +114,6 @@ class MyClient {
             System.out.println(e);
             return "";
         }
-    }
-
-    //METHOD: Get list of 'waiting' jobs
-    public static List<Job> getsListOfWaitingJobs(String serverType, Integer serverId, DataOutputStream dout, BufferedReader brin){
-        List<Job> listOfJobs = new ArrayList<Job>();
-        String dataMsg;
-        String[] dataMsgArr;
-        Integer noDataLines;
-        sendToServer("LSTJ " + serverType +
-                        " " + serverId +
-                        "\n", dout);
-        dataMsg = receivedFromServer(brin);
-        dataMsgArr = dataMsg.trim().split("\\s+");
-        noDataLines = Integer.valueOf(dataMsgArr[1]);
-        if(!(noDataLines == 0)){
-            sendToServer("OK\n", dout);
-            //RESPONDS DATA: Server States
-            //Extract number of data lines from 'Data message' and Print Jobs
-            //Create an object for each job read and add to listOfJobs
-            for (int i = 0; i < noDataLines; i++) {
-                String jobsMsg = receivedFromServer(brin);
-
-                String[] jobMsgArr = jobsMsg.trim().split("\\s+");
-                Job job = new Job(
-                    Integer.parseInt(jobMsgArr[2]),
-                    Integer.parseInt(jobMsgArr[0]),
-                    Integer.parseInt(jobMsgArr[4]),
-                    Integer.parseInt(jobMsgArr[5]),
-                    Integer.parseInt(jobMsgArr[6]),
-                    Integer.parseInt(jobMsgArr[7]));
-                job.setJobState(Integer.parseInt(jobMsgArr[1]));
-                listOfJobs.add(job);
-            }
-
-            //REFERENCE: https://stackoverflow.com/questions/18448671/how-to-avoid-concurrentmodificationexception-while-removing-elements-from-arr
-            Iterator<Job> iter = listOfJobs.iterator();
-
-            while (iter.hasNext()) {
-                Job job = iter.next();
-                if(job.jobState == 1){
-                    iter.remove();
-                }
-            }
-        }
-        sendToServer("OK\n", dout);
-        receivedFromServer(brin);
-
-        return listOfJobs;
-    }
-
-    //METHOD: Get all servers
-    public static List<Server> getsAllServers(DataOutputStream dout, BufferedReader brin){
-        List<Server> listOfServers = new ArrayList<Server>();
-        sendToServer("REDY\n", dout);
-                //RESPONDS JOBN
-                receivedFromServer(brin);
-
-                //GET EACH SERVER CONFIGURATIONS
-                sendToServer("GETS All\n", dout);
-                String dataMsg= receivedFromServer(brin);
-                sendToServer("OK\n", dout);
-                //RESPONDS DATA: Server States
-                //#region
-                //Extract number of data lines from 'Data message' and Print Servers
-                //Create an object for each server read and add to listOfServer
-                String[] dataMsgArr = dataMsg.trim().split("\\s+");
-                Integer noDataLines = Integer.parseInt(dataMsgArr[1]);
-                for (int i = 0; i < noDataLines; i++) {
-                    String serverMsg = receivedFromServer(brin);
-
-                    String[] serverMsgArr = serverMsg.trim().split("\\s+");
-                    Server server = new Server(
-                        serverMsgArr[0],                    //Type
-                        Integer.parseInt(serverMsgArr[1]),  //ID
-                        serverMsgArr[2],                    //State
-                        Integer.parseInt(serverMsgArr[3]),  //curStartTime
-                        Integer.parseInt(serverMsgArr[4]),  //Cores
-                        Integer.parseInt(serverMsgArr[5]),  //Memory
-                        Integer.parseInt(serverMsgArr[6]),  //Disk
-                        Integer.parseInt(serverMsgArr[7]), 
-                        Integer.parseInt(serverMsgArr[8])
-                    );
-                    listOfServers.add(server);
-                }
-                //#endregion
-
-                sendToServer("OK\n", dout);
-                receivedFromServer(brin);
-
-                return listOfServers;
     }
     
     //METHOD: Get all 'capable' servers
