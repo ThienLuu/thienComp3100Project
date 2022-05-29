@@ -8,6 +8,7 @@ public class Server implements Comparable<Server>{
     Integer disk;
     Integer wJobs;
     Integer rJobs;
+    Integer estTime;
 
     public Server(String type,
                     Integer serverId,
@@ -27,16 +28,15 @@ public class Server implements Comparable<Server>{
         this.disk = disk;
         this.wJobs = wJobs;
         this.rJobs = rJobs;
+        estTime = 0;
     }
 
+    //METHOD: Get number of waiting jobs for Server object
     Integer getWJobs(){
         return wJobs;
     }
 
-    Integer getCores(){
-        return cores;
-    }
-
+    //METHOD: Used for list sorting
     @Override
     public int compareTo(Server ss) {
         if(this.cores == ss.cores){

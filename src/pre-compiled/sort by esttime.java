@@ -25,9 +25,7 @@ class MyClient {
         Boolean schedLoop = true;
         //RESPONDS DATA MSG
         List<Server> listOfServers = new ArrayList<Server>();
-        List<Server> listOfCapable = new ArrayList<Server>();
-        List<Server> listOfAvailable = new ArrayList<Server>();
-        List<Server> listOfReady = new ArrayList<Server>();
+        List<Server> listOfScheduledJobs = new ArrayList<Server>();
         Integer serverSelectMark = 0;
         //List<Integer> listOfIntegers = new ArrayList<Integer>();
         while (schedLoop) {
@@ -74,7 +72,6 @@ class MyClient {
                 firstLoop = false;
             }
             //#endregion
-
             //-=-firstCycle-=-
             sendToServer("REDY\n", dout);
             //RESPONDS JOBN
@@ -92,7 +89,7 @@ class MyClient {
                         Integer.parseInt(dsServerMsgArr[6]));
 
                     //Get a list of capable servers
-                    listOfCapable.clear();
+                    List<Server> listOfCapable = new ArrayList<Server>();
                     listOfCapable = getsCapable(job.core, job.memory, job.disk, dout, brin);
 
                     sendToServer("REDY\n", dout);
@@ -100,40 +97,25 @@ class MyClient {
                     receivedFromServer(brin);
 
                     //Get list of Available Servers
-                    listOfAvailable.clear();
+                    List<Server> listOfAvailable = new ArrayList<Server>();
                     listOfAvailable = getsAvailable(job.core, job.memory, job.disk, dout, brin);
 
-                    listOfReady.clear();
-                    for (Server serverCapable : listOfCapable) {
-                        for (Server serverAvailable : listOfAvailable) {
-                            if(serverAvailable.serverId == serverCapable.serverId){
-                                listOfReady.add(serverCapable);
-                            }
-                        }
-                    }
                     Server selectedServer;
 
-                    if(!listOfReady.isEmpty()){
-                        sendToServer("REDY\n", dout);
-                        //RESPONDS JOBN
-                        receivedFromServer(brin);
-                        selectedServer = listOfReady.get(listOfReady.size() - 1);
-
+                    if(!(listOfAvailable.isEmpty())){
+                        selectedServer = listOfAvailable.get(listOfAvailable.size() - 1);
                         sendToServer("SCHD " + job.jobId + " "
                                 + selectedServer.type + " "
                                 + selectedServer.serverId
                                 + "\n", dout);
                     }
                     else{
-                        //Sort list of capable jobs with scheduled jobs ascending order
-                        Collections.sort(listOfCapable, Comparator.comparingInt(Server::getWJobs));
                         for (Server server : listOfCapable) {
-                            if(server.wJobs == listOfCapable.get(0).wJobs){
-                                
-                            }
+                            sendToServer("EJWT " + server.type + " " + server.serverId + "\n", dout);
+                            server.setEstTime(Integer.parseInt(receivedFromServer(brin)));
                         }
+                        Collections.sort(listOfCapable, Comparator.comparingInt(Server::getEstTime));
                         selectedServer = listOfCapable.get(0);
-
                         sendToServer("REDY\n", dout);
                         //RESPONDS JOBN
                         receivedFromServer(brin);
@@ -143,6 +125,20 @@ class MyClient {
                                 + selectedServer.serverId
                                 + "\n", dout);
                     }
+                    // else{
+                    //     //Sort list of capable jobs 'with scheduled jobs' in ascending order
+                    //     Collections.sort(listOfCapable, Comparator.comparingInt(Server::getWJobs));
+                    //     selectedServer = listOfCapable.get(0);
+
+                    //     sendToServer("REDY\n", dout);
+                    //     //RESPONDS JOBN
+                    //     receivedFromServer(brin);
+
+                    //     sendToServer("SCHD " + job.jobId + " "
+                    //             + selectedServer.type + " "
+                    //             + selectedServer.serverId
+                    //             + "\n", dout);
+                    // }
 
                     //RESPONSE 'OK'
                     receivedFromServer(brin);
