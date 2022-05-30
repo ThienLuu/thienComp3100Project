@@ -52,6 +52,8 @@ class MyClient {
 
                     Server selectedServer;
 
+                    //Check if list of available server is empty, if not schedule job to the largest available server
+                    //If it is, then schedule to a server capable of handling the job with the least of queued jobs
                     if(!(listOfAvailable.isEmpty())){
                         selectedServer = listOfAvailable.get(listOfAvailable.size() - 1);
                         sendToServer("SCHD " + job.jobId + " "
