@@ -93,7 +93,7 @@
 \begin{minipage}{1\textwidth} % Center of title section
 \centering 
 \large % Title text size
-Project report: Stage 1\\ % Assignment title and number
+Project report: Stage 2\\ % Assignment title and number
 COMP3100 Distributed Systems, S2, 2022\\
 \normalsize % Subtitle text size
 SID: 46030190, Name: Thien Luu \cite{code}
@@ -111,69 +111,64 @@ SID: 46030190, Name: Thien Luu \cite{code}
 %----------------------------------------------------------------------------------------
 
 \section{Introduction}
-The project is a university assignment allocated for COMP3100 students to allow them to build and showcase according to the specifications outlined, their understanding of Distributed Systems given a Distributed Systems simulator. There are 2 stages to it, \textbf{Stage 1} - being assessing the working of code in a demo session, and \textbf{Stage 2} - Offline marking on report, project management and code.
+COMP3100 Stage 2 is continuing from Stage 1 where we built the foundation of communicating with a Distributed System and how to schedule jobs. Stage 2 of the assignment partly focuses on studying different scheduling algorithms, understanding them i.e. ‘First Fit’, ‘Best Fit’, ‘Worst Fit’, and ‘First Compatible’ and creating our own algorithm and implementing it.
 \bigskip
 
-The simulator we are given is a server (ds-server) that simulates all tasks, job submissions, and job execution. The task is to create a client (ds-client) to communicate with the server to schedule jobs (client-server model) using the Largest Round Robin (LRR) algorithm.
+The fore mentioned algorithms will be used as a baseline test and comparison with at least one of our own scheduling algorithm we develop. This scheduling algorithm we develop, we implement into our distributed system simulator, the main goal of this assignment being to optimise the average turnaround time and to NOT sacrifice any other performance metrics.
 \bigskip
 
-Our goal here is to learn how a distributed system functions as we build it - establishing a connection (handshake), then for them to communicate with each other, allocate jobs, add job to queue, complete, and schedule jobs using LRR, and then closing the connection. We will have to perform research, apply Java programming knowledge for the build to develop our understanding and create a report using \LaTeX.
+Like stage 1, we’ll have to write a report using \LaTeX, have evidence of project management, and demonstrate our written code with the chosen implemented algorithm.
+Our goal of the project is to demonstrate our understanding of existing algorithms through report writing and research, and to develop our own algorithm to optimise average turnaround time through coding.
 
 %----------------------------------------------------------------------------------------
-%	2 - SYSTEM OVERVIEW (1/2 PAGE)
+%	2 - PROBLEM OVERVIEW (1/2 PAGE)
 %----------------------------------------------------------------------------------------
 
-\section{System Overview}
+\section{Problem Overview}
 \label{sec:section2}
-\subsection*{Server-side}
-DS-Sim server-side acts as being a simulator housing servers of types. Jobs are processed by these servers once they are scheduled by the client-side. The server accepts messages from the client that asks the server to process jobs on certain servers it requests or requests server information for the client to determine and other statuses or errors. The server is programmed with a default socket to be 'localhost', on port 50000 for multiple clients to establish a connection to it and schedule jobs.
-
-\subsection*{Client-side}
-The Client-side of DS-Sim communicates with the server-side to \textit{only} schedule jobs. To schedule jobs it'll first need to be able to communicate with the server and to do this it'll connect to the server-side socket (assuming the server is already running). We then declare two variables to talk. One to send and the other to receive using 'OutputStream' and 'InputStream' respectively. The client is ready to communicate, the client will initialize communication via a handshake sending 'HELO' to the server, the server then responds 'OK'.
-
+There are existing scheduling algorithms such as aforementioned, first fit, best fit, worst fit, and first compatible that are suitable and most efficient for certain cases. However in our distributed system the goal is to achieve a better turnaround time and these existing algorithms are limited. Another problem is we can’t sacrifice other performance metrics to achieving a better average turnaround time.
 \bigskip
-Now that they are connected, on the server-side, before being able to schedule jobs, the server is programmed and requires the client to authenticate, which the client sends 'AUTH \textit{name}', the server responds 'OK'. Here the Client sends 'REDY' to indicate they are ready to acquire Job information, request server information, schedule jobs on available servers, and handle any job errors that arise - information received from the server and for the client to handle. These information request processes will be implemented with loops as there are multiple jobs to be scheduled. Once all jobs have completed processing, the client will terminate the connection with the server with 'QUIT' and close the socket.
+
+Taking into consideration, the Distributed System Simulator may have jobs to be scheduled, each job having different requirements. Potentially a job that is scheduled may be using unnecessary resources, and the next jobs to be scheduled and allocated to this server will have to wait resulting in a long turnaround time.
+\bigskip
+
+This can be resolved by using more readily available resources outside what’s been initially provided to only work with, however we sacrifice other performance metrics resulting in higher costs.
+
 
 %----------------------------------------------------------------------------------------
-%	3 - DESIGN (1 PAGE)
+%	3 - ALGORITHM DESCRIPTION (1 PAGE)
 %----------------------------------------------------------------------------------------
 \break
-\section{Design}
+\section{Algorithm Description}
 \label{sec:section3}
-DS-Sim is acting as both a server and user, we are creating a client being the middleman to accept jobs from DS-Sim (user) and return jobs to DS-Sim (server) to process. Before scheduling jobs accordingly to the LRR algorithm requirement, we need to determine the right servers to use by requesting server information, see what server types there are, how many there are, and cores.
+The scheduling algorithm adopts a feature of the worst fit algorithm where it selects the largest server that is ‘available’ first, and schedules a job to it which then all it's resources are occupied. The next job is scheduled on the biggest server 'available' and so fourth.
+\medskip
+
+This modified version of the worst fit algorithm, upon scheduling, a job is scheduled on the largest server ‘available’. If there is remaining resources for this server, and meets the requirements of the next job to be scheduled, this job will be scheduled on this server. If not, then it’ll be scheduled onto the next largest ‘available’ server. This process will repeat until a job is completed.
+\medskip
+
+When a job is completed, the resource is free’d. Depending on the requirements of the next job, if there’s enough resource, the job is then scheduled. If all servers are busy running with no remaining resources to support the next job, then it’ll be queued.
 
 \medskip
-\textit{The design does not implement XML file reading, where the client reads an XML file containing the settings of servers to be created by the server. The client is treated as a remote client not read files remotely via the connection, only able to send and receive messages - to request and submit information}
+The queue is determined by selecting the server with the least amount of queued jobs. This repeats, evenly distributing, queuing jobs across the servers.
+
+\subsection*{Sample Scheduling Scenario}
+Below there are 2 servers, one small with 2 cores, and one medium with 4 cores. There are 5 jobs, 2 with 1 cores, 2 with 2 cores and 1 with 4 cores. They are scheduled regardless of memory or disk usage. In teh scheduling algorithm the memory and disk usage is considered to get the available servers.
 
 \begin{figure}[!h]
     \centering
-    \includegraphics[width=7cm]{images/ds-serverANDclient diagram.jpg}
-    \caption{Using DS-Sim}
+    \includegraphics[width=17cm]{images/MySchedulingDiagram.jpg}
+    \caption{My Scheduling Algorithm Diagram}
     \label{fig:my_label}
 \end{figure}
 
-\subsection{Communication with DS-Sim}
-According to the ds-sim configuration, there are many messages to receive in different stages of communication. Conditional statements will have to be used to simplify the handling of messages. Messages received for example are to perform processes, request information, or errors. Having this sort of handling allows for future expansion if the server side is updated for example with new messages and we can add messages to send and handle.
-
-\medskip
-With communication over socket programming, we'll have separate methods, one for sending messages, and one for receiving messages. This will keep the code cleaner, \cite{advantagesofoop} reusable and modular
-
-\subsection{Selecting Server for scheduling}
-The requirements are to use the server group of \textit{a type that is the first one to be added}, of the \textit{largest core} to be used for processing jobs. The design will require loops to iterate through the servers information received from the DS-Sim to be sorted and the correct server can then be used.
-
-\subsection{Scheduling Jobs}
-Scheduling jobs must be done using the LRR algorithm. To do this, once we have the server group of type, we have a loop, and in the loop, schedule a job to a server and then increment the 'serverid' to be used for the next loop iteration scheduling a job to a different server of the same type. This process cycles until the DS-Sim indicates with a message saying there are no more jobs to schedule. Once the 'serverid' reaches a point where there are no more servers of that type available, the 'serverid' resets and starts scheduling from the first server it scheduled a job on. If a job is still being processed, the new job is still scheduled but it is queued to be processed as soon as the one currently processed finishes.
-
-\subsection{Object}
-Jobs and Servers have their attributes according to the specifications, and following best code design practices, we can achieve \cite{advantagesofoop} flexibility and modularity with the use of objects. We'll have a Job and Server class BUT for Stage 1, only Server will be implemented.
-
 %----------------------------------------------------------------------------------------
-%	4 - IMPLEMENTATION (2 PAGE)
+%	4 - IMPLEMENTATION (1/2 PAGE)
 %----------------------------------------------------------------------------------------
 \break
 \section{Implementation}
 \subsection*{Classes}
-\textbf{-=ServerState=- \textit{implements} Comparable}
+\textbf{-=Server=- \textit{implements} Comparable}
 \begin{flushleft}
     \begin{tabular}{|l|l|l|}
         \hline
@@ -181,7 +176,7 @@ Jobs and Servers have their attributes according to the specifications, and foll
         \hline
         Type & String & Type of Server \\
         \hline
-        ServerId & Integer & ID of Server\\
+        ServerId & Integer & Identification number of Server\\
         \hline
         ServerState & String & State of Server\\
         \hline
@@ -197,71 +192,97 @@ Jobs and Servers have their attributes according to the specifications, and foll
         \hline
         rJobs & Integer & Number of jobs running\\
         \hline
+        estTime & Integer & Sum of estimated runtime of jobs queued and running\\
+        \hline
     \end{tabular}
 \end{flushleft}
 
-Implementing comparable allows for sorting a list of servers
+\textbf{-=Job=-}
+\begin{flushleft}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Attribute Name} & \textbf{Data Type} & \textbf{Description} \\
+        \hline
+        submitTime & Integer & Submission time to server\\
+        \hline
+        jobId & Integer & Identification number of Job\\
+        \hline
+        estRuntime & Integer & Estimated runtime\\
+        \hline
+        core & Integer & Required cores\\
+        \hline
+        Memory & Integer & Required memory\\
+        \hline
+        Disk & Integer & Required disk space\\
+        \hline
+        jobState & Integer & State of job - Running or waiting\\
+        \hline
+    \end{tabular}
+\end{flushleft}
 
-\subsection{Establishing connection & Communication}
-To connect with the server on DS-Sim, its port number is by default '50,000' connecting to 'localhost'.
-We create a socket of 'localhost', and port number '50,000'. Socket uses the package 'Socket' from 'java.net'
+The idea behind implementing the scheduling algorithm requires the commands:
 
-\medskip
-Sending messages to the server we declare a 'DataOutputStream' as 'dout'.
-Receiving messages from the server we create a buffer by declaring a 'BufferedRead' as 'brin'
-Both 'DataOutputStream' and 'Buffered' Reader are from the package 'java.io'
-
-\medskip
-To simplify sending and receiving messages between the servers in our code, we create a method for sending and receiving called 'sendToServer' and 'receivedFromServer' respectively. We use the method and pass a message we want to send to the server into the method. Similarly, we acquire a message from the server using the receiving message method returning a string.
-
-\subsubsection{Communication Connection}
 \begin{enumerate}
-    \item When the client is running, it'll have connected to the server. Here we establish a handshake communication connection with the server by sending 'HELO' and the server will respond with 'OK'
-    \item The server requires clients to authenticate themselves with a name, the client sends 'AUTH [name]', and the server responds with 'OK'
-    \item Communication connection is established, ready to request a Job with 'REDY'.
+    \item GETS Available
+    \item GETS Capable
 \end{enumerate}
 
-\subsection{Acquire Server Information}
-Upon sending 'REDY' we get a Job response from the server. We can schedule this job but we wouldn't know which server to schedule it on and we need to know a certain server type of the highest core, so we'll get server information.
-
+Primarily the 'GETS Available' command is used to achieve the scheduling algorithm, it gives back a list of immediately available servers for a job. The list is already sorted from smallest to largest by type. The largest server being at the bottom of the list is used first and then this process repeats, requests available servers, and schedules jobs to the largest server at the bottom of the list.
 \medskip
-Getting server information uses the command 'GETS All', and we get a 'DATA n' message. This message gives us how many lines of message. We use this number to iterate through the 'bufferedReader'. The message is trimmed to an array of strings to acquire the number to iterate at index 1, and we create a 'ServerState' object each time we iterate. The object gets added to a list of 'ServerState' objects called 'listOfServerStates'. The package 'java.util.List' is needed for this.
 
-\medskip
-After iteration the server will respond with '.' to indicate it is the end of the message.
+But when there are no immediately available servers when the command is called, the 'GETS Capable' is then used to assist. This command gets a list of all servers capable of running the next scheduled job. This list of servers will then be sorted based on how many jobs they have. The server capable of running the job, with the least amount of jobs will then be queued with the next job. This process evenly distributes, queuing the jobs across the servers.
 
-\subsection{Sort Server Information}
-With the list of servers, it'll be sorted with 'Collections.sort' part of the package 'java.util' using the implemented method in the 'ServerState' class called 'compareTo' that sorts based on the cores. From this, we get the index of 0 which is the first server that's added of the highest core to be used as the 'ServerState' for scheduling jobs
-
-\subsection{Scheduling Jobs}
-Now scheduling jobs, it'll be individually thus requires a loop. First declaring a data type Boolean named 'firstLoop', set it to true (used to stop the loop if no more jobs is received) and an Integer named 'serverId' set to 0. This 'serverId' variable will be used to achieve the LRR algorithm where it goes around and resets itself to schedule jobs on different servers of the same server type. A while loop is used, its condition set to the 'firstLoop' variable to keep looping till it doesn't receive a job.
-\begin{enumerate}
-    \item In the loop it starts with sending 'REDY' message, it's a gets a Job message which is trimmed and stored in an array of strings named 'serverMsgArr'
-    \item Next a switch conditional statement is used to handle messages at index '0' of 'serverMsgArr'
-    \item
-        \begin{itemize}
-            \item If it's a job - 'JOBN'
-            \begin{enumerate}
-                \item It'll then get scheduled with information from 'serverMsgArr' and on the 'serverId', and the type with max core
-                \item 'ServerId' is incremented for the next job to be scheduled on a different server of the same type
-                \item There is another conditional statement to handle if the 'serverId' reaches the last 'serverId' of the same type to reset and achieve LRR
-                \item Repeat, loop
-            \end{enumerate}
-            \item If it's 'NONE'
-                \begin{itemize}
-                    \item There are no more jobs, 'firstLoop' is set to false to break the loop
-                \end{itemize}
-        \end{itemize}
-\end{enumerate}
-
-\subsection{Close Connection}
-The connection must be closed to not interfere and free up the connection for future applications or clients wanting to connect to the server. First, the client informs the server it is done and does not want to further communicate by sending to the server 'QUIT', and the server responds with 'QUIT'. Closing the actual connection is done by closing with 'dout' 'DataOutputReader' and 's' Socket.
+\subsection*{Not Implemented}
+An attempt was made to improve the efficiency of the algorithm by using the 'MIGJ' command. Where when a job is completed, a search is conducted across all servers. The server with the largest amount of queued jobs, a job from this server, an attempt is made to migrate it to a server that is 'idle' or 'inactive'. This attempt evenly distributes jobs that are in a long queue, and placed on an 'available' server to immediately run. The attempt can be seen in the branch 2.1.
 
 %----------------------------------------------------------------------------------------
-%	5 - REFERENCE LIST
+%	5 - EVALUATION (2 PAGE)
 %----------------------------------------------------------------------------------------
-
 \break
+\section{Evaluation}
+The Stage2-test suite was used with the new algorithm to acquire these \textbf{average results}. This test suite contained 18 configurations.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=8.5cm]{images/TurnaroundTimeDiagram.jpg}
+    \label{fig:my_label}
+\end{figure}
+In terms of turnaround time, the new algorithm performed overall on average better than existing algorithms. The worst performing algorithm was the 'First Compatible', performing roughly 150x worst than the new algorithm.
+\medskip
+
+The results provided by the test suite showed 6 of 18 configurations where our algorithm performed better than all the existing algorithms. The ones that didn't, only performed better for Worst Fit and First Capable. Our algorithm requires some features of First Fit and Best Fit to further improve the turnaround time. It seems with Best Fit, the search for the correct fitment of jobs to be scheduled on the server allows for the improve efficiency which the new algorithm does not currently have.
+
+\begin{figure}
+\centering
+    \begin{minipage}{.5\textwidth}
+      \centering
+        \includegraphics[width=7cm]{images/ResourceUtilizationDiagram.jpg}
+      \label{fig:test1}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+      \centering
+        \includegraphics[width=7cm]{images/TotalRentalCostDiagram.jpg}
+      \label{fig:test2}
+    \end{minipage}
+    \begin{flushleft}
+        Resource Utilisation, our new algorithm did perform better in most cases better than some algorithms. Only one of the cases of the 18 was worst. Overall the average of the new algorithm was only better than the First Capable.
+        \medskip
+        
+        Total Rental Cost, our new algorithm did perform better in most cases better than some algorithms. Overall the average of the new algorithm was better than all existing algorithms but First Capable.
+    \end{flushleft}
+\end{figure}
+
+%----------------------------------------------------------------------------------------
+%	6 - CONCLUSION (1/4 PAGE)
+%----------------------------------------------------------------------------------------
+\break
+\section{Conclusion}
+In conclusion, the new scheduling algorithm can be further improved with features of other scheduling algorithms through calculations it wasn't able to outperform. But overall the turnaround time average was better. There was some sacrificing of performance metrics when compared to some of the existing scheduling algorithms, so in conclusion this is average.
+
+%----------------------------------------------------------------------------------------
+%	7 - REFERENCE LIST
+%----------------------------------------------------------------------------------------
+
 \bibliographystyle{ieeetr}
 \bibliography{comp3100project}
 % \printbibliography
